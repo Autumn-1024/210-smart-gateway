@@ -1,0 +1,29 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/../Drivers/BSP/**",
+                "${workspaceFolder}/../Drivers/SYSTEM/**",
+                "${workspaceFolder}/../Drivers/CMSIS/Include/**",
+                "${workspaceFolder}/../Drivers/CMSIS/Device/ST/STM32F1xx/Include/**",
+                "${workspaceFolder}/../Drivers/STM32F1xx_HAL_Driver/Inc/**",
+                "${workspaceFolder}/../User/**",
+                "${workspaceFolder}/../Drivers/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "USE_HAL_DRIVER",
+                "STM32F103xB"
+            ],
+            "compilerPath": "D:/Keil_v5/UV4/ARMCC/bin",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-gcc-arm"
+        }
+    ],
+    "version": 4
+}

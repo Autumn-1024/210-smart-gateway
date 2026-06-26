@@ -1,0 +1,22 @@
+# Keil 编译产物
+Output/
+Listings/
+
+# Keil 用户配置
+*.uvguix.*
+*.uvoptx
+
+# VS Code 日志
+*.log
+*.log.*
+*.lock
+
+# Debug 配置
+DebugConfig/
+
+# 临时文件
+*.bak
+*.dep
+*.iex
+*.scvd
+EventRecorderStub.scvd

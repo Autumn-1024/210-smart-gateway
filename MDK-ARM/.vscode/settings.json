@@ -1,0 +1,21 @@
+{
+    "files.associations": {
+        "key.h": "c",
+        "mqtt.h": "c",
+        "oled.h": "c",
+        "dht11.h": "c",
+        "delay.h": "c",
+        "adc.h": "c",
+        "led.h": "c",
+        "ds18b20.h": "c",
+        "oledfont.h": "c",
+        "usart.h": "c",
+        "wind.h": "c",
+        "ph.h": "c",
+        "do.h": "c",
+        "turb.h": "c",
+        "ec.h": "c",
+        "orp.h": "c",
+        "deep.h": "c"
+    }
+}
