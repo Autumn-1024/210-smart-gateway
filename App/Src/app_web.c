@@ -34,6 +34,10 @@
 #define IR2_MODULE_IP   "10.0.50.107"
 #define IR2_MODULE_PORT 80
 
+#define LIGHT1_IP       "10.0.50.105"
+#define LIGHT2_IP       "10.0.50.106"
+#define LIGHT_PORT      80
+
 /******************************************************************************************/
 /* 预计算窗帘控制帧 (地址+开/关) */
 
@@ -97,6 +101,21 @@ static const char html_page[] =
 "<button class=\"b o\" onclick=\"s(this,'/ir2/1')\">ON</button>"
 "<button class=\"b x\" onclick=\"s(this,'/ir2/2')\">OFF</button>"
 "<button class=\"b a\" onclick=\"s(this,'/ir2/3')\">AUTO</button></div>"
+"<div class=\"c\"><h3>Lights</h3>"
+"<button class=\"b o\" onclick=\"s(this,'/l/0/1')\">ALL ON</button>"
+"<button class=\"b x\" onclick=\"s(this,'/l/0/0')\">ALL OFF</button>"
+"<button class=\"b o\" onclick=\"s(this,'/l/1/1')\">L1 ON</button>"
+"<button class=\"b x\" onclick=\"s(this,'/l/1/0')\">L1 OFF</button>"
+"<button class=\"b o\" onclick=\"s(this,'/l/2/1')\">L2 ON</button>"
+"<button class=\"b x\" onclick=\"s(this,'/l/2/0')\">L2 OFF</button>"
+"<button class=\"b o\" onclick=\"s(this,'/l/3/1')\">L3 ON</button>"
+"<button class=\"b x\" onclick=\"s(this,'/l/3/0')\">L3 OFF</button>"
+"<button class=\"b o\" onclick=\"s(this,'/l/4/1')\">L4 ON</button>"
+"<button class=\"b x\" onclick=\"s(this,'/l/4/0')\">L4 OFF</button>"
+"<button class=\"b o\" onclick=\"s(this,'/l/5/1')\">L5 ON</button>"
+"<button class=\"b x\" onclick=\"s(this,'/l/5/0')\">L5 OFF</button>"
+"<button class=\"b o\" onclick=\"s(this,'/l/6/1')\">L6 ON</button>"
+"<button class=\"b x\" onclick=\"s(this,'/l/6/0')\">L6 OFF</button></div>"
 "</div>"
 "<div id=\"log\"></div>"
 "<script>"
@@ -206,6 +225,46 @@ static void on_http_request(uint8_t link_id, const char *method, const char *pat
             bsp_esp01s_send_response(link_id, http_200_text, msg);
             return;
         }
+    }
+
+    /* Light control: /l/{id}/{state} id:0=all,1-6=light state:1=on,0=off */
+    if (path[0] == '/' && path[1] == 'l' && path[2] == '/')
+    {
+        uint8_t light_id = path[3] - '0';
+        uint8_t state = path[5] - '0';
+        char json[24];
+        const char *ip;
+
+        if (light_id == 0)
+        {
+            snprintf(json, sizeof(json), "{\"power0\": %d}", state);
+            printf("[WEB] -> Light ALL %s\r\n", state ? "ON" : "OFF");
+            bsp_esp01s_http_post(LIGHT1_IP, LIGHT_PORT, json);
+            if (bsp_esp01s_http_post(LIGHT2_IP, LIGHT_PORT, json))
+                snprintf(msg, sizeof(msg), "ALL %s OK", state ? "ON" : "OFF");
+            else
+                snprintf(msg, sizeof(msg), "ALL %s FAIL", state ? "ON" : "OFF");
+        }
+        else if (light_id <= 6)
+        {
+            uint8_t pw = (light_id <= 3) ? light_id : light_id - 3;
+            ip = (light_id <= 3) ? LIGHT1_IP : LIGHT2_IP;
+            snprintf(json, sizeof(json), "{\"power%d\": %d}", pw, state);
+            printf("[WEB] -> Light%d %s\r\n", light_id, state ? "ON" : "OFF");
+
+            if (bsp_esp01s_http_post(ip, LIGHT_PORT, json))
+                snprintf(msg, sizeof(msg), "L%d %s OK", light_id, state ? "ON" : "OFF");
+            else
+                snprintf(msg, sizeof(msg), "L%d %s FAIL", light_id, state ? "ON" : "OFF");
+        }
+        else
+        {
+            bsp_esp01s_send_response(link_id, http_404, NULL);
+            return;
+        }
+
+        bsp_esp01s_send_response(link_id, http_200_text, msg);
+        return;
     }
 
     /* 首页 */
