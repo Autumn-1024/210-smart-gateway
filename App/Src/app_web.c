@@ -31,6 +31,9 @@
 #define IR_MODULE_IP    "10.0.50.110"
 #define IR_MODULE_PORT  80
 
+#define IR2_MODULE_IP   "10.0.50.107"
+#define IR2_MODULE_PORT 80
+
 /******************************************************************************************/
 /* 预计算窗帘控制帧 (地址+开/关) */
 
@@ -90,6 +93,10 @@ static const char html_page[] =
 "<button class=\"b o\" onclick=\"s(this,'/ir/1')\">ON</button>"
 "<button class=\"b x\" onclick=\"s(this,'/ir/2')\">OFF</button>"
 "<button class=\"b a\" onclick=\"s(this,'/ir/3')\">AUTO</button></div>"
+"<div class=\"c\"><h3>AC Control 2</h3>"
+"<button class=\"b o\" onclick=\"s(this,'/ir2/1')\">ON</button>"
+"<button class=\"b x\" onclick=\"s(this,'/ir2/2')\">OFF</button>"
+"<button class=\"b a\" onclick=\"s(this,'/ir2/3')\">AUTO</button></div>"
 "</div>"
 "<div id=\"log\"></div>"
 "<script>"
@@ -175,6 +182,26 @@ static void on_http_request(uint8_t link_id, const char *method, const char *pat
                 snprintf(msg, sizeof(msg), "IR%d OK", ir_id);
             else
                 snprintf(msg, sizeof(msg), "IR%d FAIL", ir_id);
+
+            bsp_esp01s_send_response(link_id, http_200_text, msg);
+            return;
+        }
+    }
+
+    /* IR2 control: /ir2/1 /ir2/2 /ir2/3 */
+    if (path[0] == '/' && path[1] == 'i' && path[2] == 'r' && path[3] == '2' && path[4] == '/')
+    {
+        uint8_t ir_id = path[5] - '0';
+        if (ir_id >= 1 && ir_id <= 3)
+        {
+            char json[24];
+            snprintf(json, sizeof(json), "{\"ir%d\": 2}", ir_id);
+            printf("[WEB] -> IR2-%d send\r\n", ir_id);
+
+            if (bsp_esp01s_http_post(IR2_MODULE_IP, IR2_MODULE_PORT, json))
+                snprintf(msg, sizeof(msg), "IR2-%d OK", ir_id);
+            else
+                snprintf(msg, sizeof(msg), "IR2-%d FAIL", ir_id);
 
             bsp_esp01s_send_response(link_id, http_200_text, msg);
             return;
