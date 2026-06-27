@@ -61,7 +61,7 @@ static const char html_page[] =
 "<!DOCTYPE html><html><head>"
 "<meta charset=\"UTF-8\">"
 "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
-"<title>Smart Gateway</title>"
+"<title>智能网关</title>"
 "<style>"
 "*{box-sizing:border-box;margin:0;padding:0}"
 "body{font-family:system-ui,-apple-system,sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;padding:20px;color:#eee}"
@@ -146,7 +146,7 @@ static const char html_page[] =
 "var lg=document.getElementById('log');"
 "function a(m,c){var d=document.createElement('div');d.className=c||'';var t=new Date();d.innerHTML='<span class=t>'+('0'+t.getHours()).slice(-2)+':'+('0'+t.getMinutes()).slice(-2)+':'+('0'+t.getSeconds()).slice(-2)+'</span> '+m;lg.appendChild(d);lg.scrollTop=lg.scrollHeight;if(lg.children.length>50)lg.removeChild(lg.firstChild)}"
 "function s(b,p){b.classList.add('d');a('>> '+p);fetch(p).then(function(r){return r.text()}).then(function(t){a('<< '+t);b.classList.remove('d')}).catch(function(e){a('ERR '+e,'e');b.classList.remove('d')})}"
-"a('Gateway ready','t')"
+"a('网关就绪','t')"
 "</script></body></html>";
 
 static const char http_200_header[] =
@@ -262,24 +262,24 @@ static void on_http_request(uint8_t link_id, const char *method, const char *pat
         if (light_id == 0)
         {
             snprintf(json, sizeof(json), "{\"power0\": %d}", state);
-            printf("[WEB] -> Light ALL %s\r\n", state ? "ON" : "OFF");
+            printf("[WEB] -> Light ALL %s\r\n", state ? "开" : "关");
             bsp_esp01s_http_post(LIGHT1_IP, LIGHT_PORT, json);
             if (bsp_esp01s_http_post(LIGHT2_IP, LIGHT_PORT, json))
-                snprintf(msg, sizeof(msg), "ALL %s OK", state ? "ON" : "OFF");
+                snprintf(msg, sizeof(msg), "ALL %s OK", state ? "开" : "关");
             else
-                snprintf(msg, sizeof(msg), "ALL %s FAIL", state ? "ON" : "OFF");
+                snprintf(msg, sizeof(msg), "ALL %s FAIL", state ? "开" : "关");
         }
         else if (light_id <= 6)
         {
             uint8_t pw = (light_id <= 3) ? light_id : light_id - 3;
             ip = (light_id <= 3) ? LIGHT1_IP : LIGHT2_IP;
             snprintf(json, sizeof(json), "{\"power%d\": %d}", pw, state);
-            printf("[WEB] -> Light%d %s\r\n", light_id, state ? "ON" : "OFF");
+            printf("[WEB] -> Light%d %s\r\n", light_id, state ? "开" : "关");
 
             if (bsp_esp01s_http_post(ip, LIGHT_PORT, json))
-                snprintf(msg, sizeof(msg), "L%d %s OK", light_id, state ? "ON" : "OFF");
+                snprintf(msg, sizeof(msg), "L%d %s OK", light_id, state ? "开" : "关");
             else
-                snprintf(msg, sizeof(msg), "L%d %s FAIL", light_id, state ? "ON" : "OFF");
+                snprintf(msg, sizeof(msg), "L%d %s FAIL", light_id, state ? "开" : "关");
         }
         else
         {
@@ -367,7 +367,7 @@ void app_web_init(void)
 
         /* 显示智能网关 + IP */
         oled_clear();
-        oled_show_string(0, 0, "Smart Gateway", 12);
+        oled_show_string(0, 0, "智能网关", 12);
         oled_show_string(0, 14, ip_addr, 12);
         oled_refresh_gram();
 
