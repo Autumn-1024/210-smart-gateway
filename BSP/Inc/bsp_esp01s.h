@@ -45,4 +45,9 @@ uint8_t bsp_esp01s_get_ip(char *ip_buf, uint8_t buf_size);
 
 void bsp_esp01s_send_response(uint8_t link_id, const char *header, const char *body);
 
+/******************************************************************************************/
+/* HTTP客户端 (POST到其他设备) */
+
+uint8_t bsp_esp01s_http_post(const char *host, uint16_t port, const char *json);
+
 #endif

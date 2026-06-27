@@ -1,4 +1,4 @@
-/**
+﻿/**
  ****************************************************************************************************
  * @file        app_web.c
  * @author      Autumn
@@ -28,6 +28,9 @@
 #define WIFI_PASS       "12345678"
 #define WEB_PORT        80
 
+#define IR_MODULE_IP    "10.0.50.110"
+#define IR_MODULE_PORT  80
+
 /******************************************************************************************/
 /* 预计算窗帘控制帧 (地址+开/关) */
 
@@ -51,40 +54,49 @@ static const char html_page[] =
 "<!DOCTYPE html><html><head>"
 "<meta charset=\"UTF-8\">"
 "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
-"<title>Curtain Control</title>"
+"<title>Smart Gateway</title>"
 "<style>"
 "*{box-sizing:border-box;margin:0;padding:0}"
-"body{font-family:Arial,sans-serif;background:#f0f2f5;padding:16px}"
-"h1{text-align:center;color:#333;margin-bottom:16px;font-size:22px}"
-".g{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:400px;margin:0 auto}"
-".c{background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.1)}"
-".c h3{font-size:14px;color:#666;margin-bottom:12px;text-align:center}"
-".b{display:block;width:100%;padding:14px;margin:6px 0;border:none;border-radius:8px;"
-"font-size:16px;font-weight:bold;color:#fff;cursor:pointer;transition:opacity .2s}"
-".b:active{opacity:.7}"
+"body{font-family:system-ui,sans-serif;background:#f0f2f5;padding:12px}"
+"h1{text-align:center;color:#333;font-size:20px;margin-bottom:12px}"
+".g{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;max-width:800px;margin:0 auto}"
+".c{background:#fff;border-radius:10px;padding:12px;box-shadow:0 1px 4px rgba(0,0,0,.08)}"
+".c h3{font-size:12px;color:#888;text-align:center;margin-bottom:8px}"
+".b{display:block;width:100%;padding:10px 0;margin:3px 0;border:none;border-radius:6px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;transition:opacity .15s}"
+".b:active{opacity:.6}"
+".b.d{opacity:.5;pointer-events:none}"
 ".o{background:#4CAF50}"
 ".x{background:#f44336}"
-"#m{text-align:center;margin-top:16px;color:#666;font-size:14px}"
+".a{background:#2196F3}"
+"#log{max-width:800px;margin:12px auto 0;background:#1a1a2e;border-radius:8px;padding:10px;max-height:180px;overflow-y:auto;font-family:monospace;font-size:11px;color:#0f0;line-height:1.6}"
+"#log .e{color:#f55}"
+"#log .t{color:#888}"
 "</style></head><body>"
-"<h1>Curtain Control</h1>"
+"<h1>Smart Gateway</h1>"
 "<div class=\"g\">"
-"<div class=\"c\"><h3>Curtain 1 (0201)</h3>"
-"<button class=\"b o\" onclick=\"c('/c1/open')\">OPEN</button>"
-"<button class=\"b x\" onclick=\"c('/c1/close')\">CLOSE</button></div>"
-"<div class=\"c\"><h3>Curtain 2 (0202)</h3>"
-"<button class=\"b o\" onclick=\"c('/c2/open')\">OPEN</button>"
-"<button class=\"b x\" onclick=\"c('/c2/close')\">CLOSE</button></div>"
-"<div class=\"c\"><h3>Curtain 3 (0203)</h3>"
-"<button class=\"b o\" onclick=\"c('/c3/open')\">OPEN</button>"
-"<button class=\"b x\" onclick=\"c('/c3/close')\">CLOSE</button></div>"
-"<div class=\"c\"><h3>Curtain 4 (0204)</h3>"
-"<button class=\"b o\" onclick=\"c('/c4/open')\">OPEN</button>"
-"<button class=\"b x\" onclick=\"c('/c4/close')\">CLOSE</button></div>"
+"<div class=\"c\"><h3>Curtain 1</h3>"
+"<button class=\"b o\" onclick=\"s(this,'/c1/open')\">OPEN</button>"
+"<button class=\"b x\" onclick=\"s(this,'/c1/close')\">CLOSE</button></div>"
+"<div class=\"c\"><h3>Curtain 2</h3>"
+"<button class=\"b o\" onclick=\"s(this,'/c2/open')\">OPEN</button>"
+"<button class=\"b x\" onclick=\"s(this,'/c2/close')\">CLOSE</button></div>"
+"<div class=\"c\"><h3>Curtain 3</h3>"
+"<button class=\"b o\" onclick=\"s(this,'/c3/open')\">OPEN</button>"
+"<button class=\"b x\" onclick=\"s(this,'/c3/close')\">CLOSE</button></div>"
+"<div class=\"c\"><h3>Curtain 4</h3>"
+"<button class=\"b o\" onclick=\"s(this,'/c4/open')\">OPEN</button>"
+"<button class=\"b x\" onclick=\"s(this,'/c4/close')\">CLOSE</button></div>"
+"<div class=\"c\"><h3>AC Control</h3>"
+"<button class=\"b o\" onclick=\"s(this,'/ir/1')\">ON</button>"
+"<button class=\"b x\" onclick=\"s(this,'/ir/2')\">OFF</button>"
+"<button class=\"b a\" onclick=\"s(this,'/ir/3')\">AUTO</button></div>"
 "</div>"
-"<div id=\"m\"></div>"
+"<div id=\"log\"></div>"
 "<script>"
-"function c(p){fetch(p).then(function(r){return r.text()}).then("
-"function(t){document.getElementById('m').textContent=t})}"
+"var lg=document.getElementById('log');"
+"function a(m,c){var d=document.createElement('div');d.className=c||'';var t=new Date();d.innerHTML='<span class=t>'+('0'+t.getHours()).slice(-2)+':'+('0'+t.getMinutes()).slice(-2)+':'+('0'+t.getSeconds()).slice(-2)+'</span> '+m;lg.appendChild(d);lg.scrollTop=lg.scrollHeight;if(lg.children.length>50)lg.removeChild(lg.firstChild)}"
+"function s(b,p){b.classList.add('d');a('>> '+p);fetch(p).then(function(r){return r.text()}).then(function(t){a('<< '+t);b.classList.remove('d')}).catch(function(e){a('ERR '+e,'e');b.classList.remove('d')})}"
+"a('Ready','t')"
 "</script></body></html>";
 
 static const char http_200_header[] =
@@ -149,7 +161,28 @@ static void on_http_request(uint8_t link_id, const char *method, const char *pat
         }
     }
 
+    /* IR control: /ir/1 /ir/2 /ir/3 */
+    if (path[0] == '/' && path[1] == 'i' && path[2] == 'r' && path[3] == '/')
+    {
+        uint8_t ir_id = path[4] - '0';
+        if (ir_id >= 1 && ir_id <= 3)
+        {
+            char json[24];
+            snprintf(json, sizeof(json), "{\"ir%d\": 2}", ir_id);
+            printf("[WEB] -> IR%d send\r\n", ir_id);
+
+            if (bsp_esp01s_http_post(IR_MODULE_IP, IR_MODULE_PORT, json))
+                snprintf(msg, sizeof(msg), "IR%d OK", ir_id);
+            else
+                snprintf(msg, sizeof(msg), "IR%d FAIL", ir_id);
+
+            bsp_esp01s_send_response(link_id, http_200_text, msg);
+            return;
+        }
+    }
+
     /* 首页 */
+
     if (path[0] == '/' && path[1] == '\0')
     {
         bsp_esp01s_send_response(link_id, http_200_header, html_page);
