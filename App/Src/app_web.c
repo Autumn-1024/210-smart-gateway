@@ -1,4 +1,4 @@
-﻿/**
+/**
  ****************************************************************************************************
  * @file        app_web.c
  * @author      Autumn
@@ -18,7 +18,6 @@
 #include "bsp_esp01s.h"
 #include "bsp_rs485.h"
 #include "bsp_oled.h"
-#include "bsp_key.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -108,6 +107,7 @@ static const char http_404[] =
 
 static uint8_t s_web_initialized = 0;
 static uint8_t s_wifi_connected = 0;
+static uint8_t s_hold_display = 0;  /* 1=保持当前OLED显示，不被菜单覆盖 */
 
 /******************************************************************************************/
 /* HTTP请求处理回调 */
@@ -169,7 +169,6 @@ static void on_http_request(uint8_t link_id, const char *method, const char *pat
 void app_web_init(void)
 {
     uint8_t i;
-    char ip_addr[20] = {0};
 
     /* 在OLED上显示初始化状态 */
     oled_clear();
@@ -201,17 +200,13 @@ void app_web_init(void)
     {
         printf("[WEB] WiFi failed!\r\n");
         oled_clear();
-        oled_show_string(0, 8, "WiFi Failed!", 12);
-        oled_show_string(0, 28, "Check ESP01S", 12);
-        oled_show_string(0, 50, "Press any key...", 12);
+        oled_show_string(0, 24, "WiFi Failed!", 12);
         oled_refresh_gram();
-
-        /* 等待任意按键 */
-        while (bsp_key_scan(0) == 0) { HAL_Delay(10); }
         return;
     }
 
     /* 获取IP地址 */
+    char ip_addr[20] = {0};
     bsp_esp01s_get_ip(ip_addr, sizeof(ip_addr));
     printf("[WEB] IP: %s\r\n", ip_addr);
 
@@ -223,33 +218,24 @@ void app_web_init(void)
     if (bsp_esp01s_start_server(WEB_PORT))
     {
         s_web_initialized = 1;
-        printf("[WEB] Server started on port %d\r\n", WEB_PORT);
 
         /* 注册HTTP回调 */
         bsp_esp01s_set_http_callback(on_http_request);
 
-        /* 显示成功信息 + IP地址 */
+        /* 显示智能网关 + IP */
         oled_clear();
-        oled_show_string(0, 0, "WiFi OK!", 12);
-        oled_show_string(0, 16, ip_addr, 12);
-        oled_show_string(0, 32, "Port: 80", 12);
-        oled_show_string(0, 50, "Press any key...", 12);
+        oled_show_string(0, 0, "Smart Gateway", 12);
+        oled_show_string(0, 14, ip_addr, 12);
         oled_refresh_gram();
 
-        /* 等待任意按键 */
-        while (bsp_key_scan(0) == 0) { HAL_Delay(10); }
+        s_hold_display = 1;  /* 保持显示，不被菜单覆盖 */
     }
     else
     {
         printf("[WEB] Server failed!\r\n");
         oled_clear();
-        oled_show_string(0, 8, "Server Failed!", 12);
-        oled_show_string(0, 28, "Port 80 in use?", 12);
-        oled_show_string(0, 50, "Press any key...", 12);
+        oled_show_string(0, 24, "Server Failed!", 12);
         oled_refresh_gram();
-
-        /* 等待任意按键 */
-        while (bsp_key_scan(0) == 0) { HAL_Delay(10); }
     }
 }
 
@@ -262,4 +248,18 @@ void app_web_process(void)
     {
         bsp_esp01s_poll();
     }
+}
+
+/**
+ * @brief       检查并清除OLED保持标志
+ * @retval      1=需要保持显示(调用后自动清除), 0=正常
+ */
+uint8_t app_web_check_hold(void)
+{
+    if (s_hold_display)
+    {
+        s_hold_display = 0;
+        return 1;
+    }
+    return 0;
 }

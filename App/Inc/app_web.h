@@ -15,5 +15,6 @@
 
 void app_web_init(void);
 void app_web_process(void);
+uint8_t app_web_check_hold(void);
 
 #endif

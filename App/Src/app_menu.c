@@ -1,4 +1,4 @@
-﻿/**
+/**
  ****************************************************************************************************
  * @file        app_menu.c
  * @author      Autumn
@@ -9,7 +9,7 @@
  * @attention
  *
  * 0.96寸 OLED 128x64, 12号字体 (每行21字符, 共5行)
- * 按键: KEY0=确认, KEY1=上移, KEY2=下移, KEY3=返回
+ * 按键: KEY0=返回, KEY1=上移, KEY2=下移, KEY3=确认
  *
  ****************************************************************************************************
  */
@@ -18,6 +18,7 @@
 #include "bsp_key.h"
 #include "bsp_oled.h"
 #include "bsp_curtain.h"
+#include "app_web.h"
 #include <stdio.h>
 
 /******************************************************************************************/
@@ -191,8 +192,8 @@ static void draw_slave_request(void)
     oled_show_string(0, 14, buf, 12);
 
     oled_show_string(0, 28, "1.Motor btn 5s", 12);
-    oled_show_string(0, 40, "2.LED x2->K0", 12);
-    oled_show_string(0, 52, "K0:Send  K3:Back", 12);
+    oled_show_string(0, 40, "2.LED x2->K3", 12);
+    oled_show_string(0, 52, "K3:Send  K0:Back", 12);
     oled_refresh_gram();
 }
 
@@ -229,11 +230,11 @@ static void handle_ctrl_addr_sel(uint8_t key)
     {
         if (cur_index < CTRL_ADDR_MAX - 1) { cur_index++; need_refresh = 1; }
     }
-    else if (key == KEY0_PRES)
+    else if (key == KEY3_PRES)
     {
         if (cur_index == CTRL_ADDR_DEFAULT)
         {
-            printf("[KEY0] Use default addr (FEFE)\r\n");
+            printf("[KEY3] Use default addr (FEFE)\r\n");
             g_curtain_use_custom = 0;
             cur_page = PAGE_CONTROL_MENU;
             cur_index = 0;
@@ -241,7 +242,7 @@ static void handle_ctrl_addr_sel(uint8_t key)
         }
         else
         {
-            printf("[KEY0] Custom addr input\r\n");
+            printf("[KEY3] Custom addr input\r\n");
             cur_page = PAGE_CTRL_ADDR_INPUT;
             addr_is_slave = 0;
             addr_pos = 0;
@@ -250,7 +251,7 @@ static void handle_ctrl_addr_sel(uint8_t key)
             need_refresh = 1;
         }
     }
-    else if (key == KEY3_PRES)
+    else if (key == KEY0_PRES)
     {
         cur_page = PAGE_MAIN_MENU;
         cur_index = 0;
@@ -304,7 +305,7 @@ static void handle_ctrl_addr_input(uint8_t key)
         addr_input[addr_pos] = addr_sel;
         need_refresh = 1;
     }
-    else if (key == KEY0_PRES)
+    else if (key == KEY3_PRES)
     {
         printf("[INPUT] pos=%d char=%c\r\n", addr_pos, hex_chars[addr_input[addr_pos]]);
 
@@ -326,7 +327,7 @@ static void handle_ctrl_addr_input(uint8_t key)
             need_refresh = 1;
         }
     }
-    else if (key == KEY3_PRES)
+    else if (key == KEY0_PRES)
     {
         cur_page = PAGE_CTRL_ADDR_SEL;
         cur_index = 0;
@@ -347,8 +348,8 @@ static void draw_ctrl_menu(void)
     for (i = 0; i < CTRL_MAX; i++)
     {
         if (i == cur_index)
-            oled_show_string(0, 12 + i * 12, ">", 12);
-        oled_show_string(8, 12 + i * 12, ctrl_menu_items[i], 12);
+            oled_show_string(0, 12 + i * 10, ">", 12);
+        oled_show_string(8, 12 + i * 10, ctrl_menu_items[i], 12);
     }
 
     oled_refresh_gram();
@@ -376,7 +377,7 @@ static void draw_percent(void)
     buf[16] = '\0';
     oled_show_string(0, 30, buf, 12);
 
-    oled_show_string(0, 48, "K1:+ K2:- K0:OK", 12);
+    oled_show_string(0, 48, "K1:UP K2:DN K3:OK", 12);
     oled_refresh_gram();
 }
 
@@ -420,19 +421,19 @@ static void handle_main_menu(uint8_t key)
             printf("[KEY2] Cursor -> %s\r\n", main_menu_items[cur_index]);
         }
     }
-    else if (key == KEY0_PRES)  /* 确认 */
+    else if (key == KEY3_PRES)  /* 确认 */
     {
         switch (cur_index)
         {
             case MAIN_SET_ADDR:
-                printf("[KEY0] -> Set Address\r\n");
+                printf("[KEY3] -> Set Address\r\n");
                 cur_page = PAGE_ADDRESS_MENU;
                 cur_index = 0;
                 need_refresh = 1;
                 break;
 
             case MAIN_CONTROL:
-                printf("[KEY0] -> Control Test (select addr)\r\n");
+                printf("[KEY3] -> Control Test (select addr)\r\n");
                 cur_page = PAGE_CTRL_ADDR_SEL;
                 cur_index = 0;
                 need_refresh = 1;
@@ -465,12 +466,12 @@ static void handle_addr_menu(uint8_t key)
             need_refresh = 1;
         }
     }
-    else if (key == KEY0_PRES)  /* 确认 */
+    else if (key == KEY3_PRES)  /* 确认 */
     {
         switch (cur_index)
         {
             case ADDR_WRITE:
-                printf("[KEY0] -> Write Address (input)\r\n");
+                printf("[KEY3] -> Write Address (input)\r\n");
                 cur_page = PAGE_ADDRESS_INPUT;
                 addr_is_slave = 0;
                 addr_pos = 0;
@@ -483,7 +484,7 @@ static void handle_addr_menu(uint8_t key)
                 break;
 
             case ADDR_SLAVE:
-                printf("[KEY0] -> Slave Request (input addr first)\r\n");
+                printf("[KEY3] -> Slave Request (input addr first)\r\n");
                 cur_page = PAGE_ADDRESS_INPUT;
                 addr_is_slave = 1;
                 addr_pos = 0;
@@ -499,9 +500,9 @@ static void handle_addr_menu(uint8_t key)
                 break;
         }
     }
-    else if (key == KEY3_PRES)  /* 返回 */
+    else if (key == KEY0_PRES)  /* 返回 */
     {
-        printf("[KEY3] Back to main menu\r\n");
+        printf("[KEY0] Back to main menu\r\n");
         cur_page = PAGE_MAIN_MENU;
         cur_index = 0;
         need_refresh = 1;
@@ -511,7 +512,7 @@ static void handle_addr_menu(uint8_t key)
 /**
  * @brief       处理地址输入按键
  *              KEY1: 上一个字符  KEY2: 下一个字符
- *              KEY0: 确认当前字符  KEY3: 返回
+ *              KEY3: 确认当前字符  KEY0: 返回
  */
 static void handle_address_input(uint8_t key)
 {
@@ -535,7 +536,7 @@ static void handle_address_input(uint8_t key)
         addr_input[addr_pos] = addr_sel;
         need_refresh = 1;
     }
-    else if (key == KEY0_PRES)  /* 确认当前字符, 移到下一位 */
+    else if (key == KEY3_PRES)  /* 确认当前字符, 移到下一位 */
     {
         printf("[INPUT] pos=%d char=%c\r\n", addr_pos, hex_chars[addr_input[addr_pos]]);
 
@@ -575,9 +576,9 @@ static void handle_address_input(uint8_t key)
             }
         }
     }
-    else if (key == KEY3_PRES)  /* 返回 */
+    else if (key == KEY0_PRES)  /* 返回 */
     {
-        printf("[KEY3] Cancel address input\r\n");
+        printf("[KEY0] Cancel address input\r\n");
         cur_page = PAGE_ADDRESS_MENU;
         cur_index = 0;
         need_refresh = 1;
@@ -589,12 +590,12 @@ static void handle_address_input(uint8_t key)
  */
 static void handle_slave_request(uint8_t key)
 {
-    if (key == KEY0_PRES)  /* 发送 */
+    if (key == KEY3_PRES)  /* 发送 */
     {
         uint8_t addr_h = (addr_input[0] << 4) | addr_input[1];
         uint8_t addr_l = (addr_input[2] << 4) | addr_input[3];
 
-        printf("[KEY0] Slave send address: 0x%02X%02X\r\n", addr_h, addr_l);
+        printf("[KEY3] Slave send address: 0x%02X%02X\r\n", addr_h, addr_l);
         bsp_curtain_set_address(addr_h, addr_l);
 
         oled_clear();
@@ -606,9 +607,9 @@ static void handle_slave_request(uint8_t key)
         cur_index = 0;
         need_refresh = 1;
     }
-    else if (key == KEY3_PRES)  /* 返回 */
+    else if (key == KEY0_PRES)  /* 返回 */
     {
-        printf("[KEY3] Cancel slave request\r\n");
+        printf("[KEY0] Cancel slave request\r\n");
         cur_page = PAGE_ADDRESS_MENU;
         cur_index = 0;
         need_refresh = 1;
@@ -638,33 +639,33 @@ static void handle_ctrl_menu(uint8_t key)
             printf("[KEY2] Cursor -> %s\r\n", ctrl_menu_items[cur_index]);
         }
     }
-    else if (key == KEY0_PRES)  /* 确认 */
+    else if (key == KEY3_PRES)  /* 确认 */
     {
         switch (cur_index)
         {
             case CTRL_OPEN:
-                printf("[KEY0] Open curtain\r\n");
+                printf("[KEY3] Open curtain\r\n");
                 bsp_curtain_open();
                 break;
 
             case CTRL_CLOSE:
-                printf("[KEY0] Close curtain\r\n");
+                printf("[KEY3] Close curtain\r\n");
                 bsp_curtain_close();
                 break;
 
             case CTRL_STOP:
-                printf("[KEY0] Stop curtain\r\n");
+                printf("[KEY3] Stop curtain\r\n");
                 bsp_curtain_stop();
                 break;
 
             case CTRL_PERCENT:
-                printf("[KEY0] -> Percent page\r\n");
+                printf("[KEY3] -> Percent page\r\n");
                 cur_page = PAGE_PERCENT;
                 need_refresh = 1;
                 return;
 
             case CTRL_QUERY:
-                printf("[KEY0] Query position\r\n");
+                printf("[KEY3] Query position\r\n");
                 bsp_curtain_query_position();
                 break;
 
@@ -678,9 +679,9 @@ static void handle_ctrl_menu(uint8_t key)
         HAL_Delay(500);
         need_refresh = 1;
     }
-    else if (key == KEY3_PRES)  /* 返回 */
+    else if (key == KEY0_PRES)  /* 返回 */
     {
-        printf("[KEY3] Back to main menu\r\n");
+        printf("[KEY0] Back to main menu\r\n");
         cur_page = PAGE_MAIN_MENU;
         cur_index = 0;
         need_refresh = 1;
@@ -710,9 +711,9 @@ static void handle_percent(uint8_t key)
             printf("[KEY1] Percent -> %d%%\r\n", percent_val);
         }
     }
-    else if (key == KEY0_PRES)  /* 确认 = 发送 */
+    else if (key == KEY3_PRES)  /* 确认 = 发送 */
     {
-        printf("[KEY0] Send percent: %d%%\r\n", percent_val);
+        printf("[KEY3] Send percent: %d%%\r\n", percent_val);
         bsp_curtain_set_percent(percent_val);
 
         oled_clear();
@@ -721,9 +722,9 @@ static void handle_percent(uint8_t key)
         HAL_Delay(500);
         need_refresh = 1;
     }
-    else if (key == KEY3_PRES)  /* 返回 */
+    else if (key == KEY0_PRES)  /* 返回 */
     {
-        printf("[KEY3] Back to control menu\r\n");
+        printf("[KEY0] Back to control menu\r\n");
         cur_page = PAGE_CONTROL_MENU;
         cur_index = CTRL_PERCENT;
         need_refresh = 1;
@@ -739,23 +740,26 @@ static void handle_percent(uint8_t key)
  */
 void app_menu_process(uint8_t key)
 {
-    /* 刷新显示 */
+    /* 刷新显示 (web层保持时跳过第一次) */
     if (need_refresh)
     {
         need_refresh = 0;
 
-        switch (cur_page)
+        if (!app_web_check_hold())
         {
-            case PAGE_WELCOME:       draw_welcome();       break;
-            case PAGE_MAIN_MENU:     draw_main_menu();     break;
-            case PAGE_ADDRESS_MENU:  draw_addr_menu();     break;
-            case PAGE_ADDRESS_INPUT: draw_address_input(); break;
-            case PAGE_ADDRESS_SLAVE: draw_slave_request(); break;
-            case PAGE_CTRL_ADDR_SEL:    draw_ctrl_addr_sel();    break;
-            case PAGE_CTRL_ADDR_INPUT:  draw_ctrl_addr_input();  break;
-            case PAGE_CONTROL_MENU:  draw_ctrl_menu();     break;
-            case PAGE_PERCENT:       draw_percent();       break;
-            default: break;
+            switch (cur_page)
+            {
+                case PAGE_WELCOME:       draw_welcome();       break;
+                case PAGE_MAIN_MENU:     draw_main_menu();     break;
+                case PAGE_ADDRESS_MENU:  draw_addr_menu();     break;
+                case PAGE_ADDRESS_INPUT: draw_address_input(); break;
+                case PAGE_ADDRESS_SLAVE: draw_slave_request(); break;
+                case PAGE_CTRL_ADDR_SEL:    draw_ctrl_addr_sel();    break;
+                case PAGE_CTRL_ADDR_INPUT:  draw_ctrl_addr_input();  break;
+                case PAGE_CONTROL_MENU:  draw_ctrl_menu();     break;
+                case PAGE_PERCENT:       draw_percent();       break;
+                default: break;
+            }
         }
     }
 

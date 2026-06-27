@@ -23,20 +23,20 @@
         {
             "name": "atk_f103c8t6",
             "includePath": [
-                "c:\\Users\\Autumn\\Desktop\\窗帘网关\\Core\\Inc",
-                "c:\\Users\\Autumn\\Desktop\\窗帘网关\\BSP\\Inc",
-                "c:\\Users\\Autumn\\Desktop\\窗帘网关\\App\\Inc",
-                "c:\\Users\\Autumn\\Desktop\\窗帘网关\\Drivers\\CMSIS\\Include",
-                "c:\\Users\\Autumn\\Desktop\\窗帘网关\\Drivers\\CMSIS\\Device\\ST\\STM32F1xx\\Include",
-                "c:\\Users\\Autumn\\Desktop\\窗帘网关\\Drivers\\STM32F1xx_HAL_Driver\\Inc",
+                "d:\\MiCloud\\GitHub\\F103-Curtain-Control\\Core\\Inc",
+                "d:\\MiCloud\\GitHub\\F103-Curtain-Control\\BSP\\Inc",
+                "d:\\MiCloud\\GitHub\\F103-Curtain-Control\\App\\Inc",
+                "d:\\MiCloud\\GitHub\\F103-Curtain-Control\\Drivers\\CMSIS\\Include",
+                "d:\\MiCloud\\GitHub\\F103-Curtain-Control\\Drivers\\CMSIS\\Device\\ST\\STM32F1xx\\Include",
+                "d:\\MiCloud\\GitHub\\F103-Curtain-Control\\Drivers\\STM32F1xx_HAL_Driver\\Inc",
                 "C:\\Program Files (x86)\\MDK\\core\\ARM\\ARMCC\\include",
                 "C:\\Program Files (x86)\\MDK\\core\\ARM\\ARMCC\\include\\rw",
-                "c:\\Users\\Autumn\\Desktop\\窗帘网关\\Core\\Startup",
-                "c:\\Users\\Autumn\\Desktop\\窗帘网关\\Core\\Src",
-                "c:\\Users\\Autumn\\Desktop\\窗帘网关\\BSP\\Src",
-                "c:\\Users\\Autumn\\Desktop\\窗帘网关\\App\\Src",
-                "c:\\Users\\Autumn\\Desktop\\窗帘网关\\Drivers\\STM32F1xx_HAL_Driver\\Src",
-                "c:\\Users\\Autumn\\Desktop\\窗帘网关"
+                "d:\\MiCloud\\GitHub\\F103-Curtain-Control\\Core\\Startup",
+                "d:\\MiCloud\\GitHub\\F103-Curtain-Control\\Core\\Src",
+                "d:\\MiCloud\\GitHub\\F103-Curtain-Control\\BSP\\Src",
+                "d:\\MiCloud\\GitHub\\F103-Curtain-Control\\App\\Src",
+                "d:\\MiCloud\\GitHub\\F103-Curtain-Control\\Drivers\\STM32F1xx_HAL_Driver\\Src",
+                "d:\\MiCloud\\GitHub\\F103-Curtain-Control"
             ],
             "defines": [
                 "STM32F103xE",
