@@ -18,4 +18,6 @@
 void bsp_uart3_init(uint32_t bound);
 uint16_t bsp_uart3_get_data(uint8_t *buf, uint16_t buf_size);
 
+extern volatile uint32_t g_uart3_isr_cnt;
+
 #endif

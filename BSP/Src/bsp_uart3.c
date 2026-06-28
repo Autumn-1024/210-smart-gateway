@@ -25,14 +25,25 @@ static UART_HandleTypeDef s_uart3_handle;
 static uint8_t s_rx_buf[UART3_RX_BUF_SIZE];
 static volatile uint16_t s_rx_head = 0;
 static volatile uint16_t s_rx_tail = 0;
+volatile uint32_t g_uart3_isr_cnt = 0;
 
 /******************************************************************************************/
 /* 底层 — 直接在中断中读取，不依赖 HAL 回调 */
 
 void USART3_IRQHandler(void)
 {
-    if (__HAL_UART_GET_FLAG(&s_uart3_handle, UART_FLAG_RXNE) != RESET)
+    uint32_t sr = s_uart3_handle.Instance->SR;
+
+    /* 溢出/帧/噪声/奇偶校验错误 → 清标志恢复接收 */
+    if (sr & (UART_FLAG_ORE | UART_FLAG_FE | UART_FLAG_NE | UART_FLAG_PE))
     {
+        __HAL_UART_CLEAR_PEFLAG(&s_uart3_handle);
+    }
+
+    /* 正常接收 */
+    if (sr & UART_FLAG_RXNE)
+    {
+        g_uart3_isr_cnt++;
         uint8_t ch = (uint8_t)(s_uart3_handle.Instance->DR & 0xFF);
         uint16_t next = (s_rx_head + 1) % UART3_RX_BUF_SIZE;
         if (next != s_rx_tail)
@@ -41,7 +52,6 @@ void USART3_IRQHandler(void)
             s_rx_head = next;
         }
     }
-    __HAL_UART_CLEAR_PEFLAG(&s_uart3_handle);
 }
 
 /******************************************************************************************/
@@ -64,10 +74,10 @@ void bsp_uart3_init(uint32_t bound)
     gpio_init.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(GPIOB, &gpio_init);
 
-    /* RX - PB11 浮空输入 */
+    /* RX - PB11 上拉输入 (防浮空噪声) */
     gpio_init.Pin  = GPIO_PIN_11;
     gpio_init.Mode = GPIO_MODE_INPUT;
-    gpio_init.Pull = GPIO_NOPULL;
+    gpio_init.Pull = GPIO_PULLUP;
     HAL_GPIO_Init(GPIOB, &gpio_init);
 
     /* USART 配置 */

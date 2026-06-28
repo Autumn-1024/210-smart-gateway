@@ -458,7 +458,8 @@ uint8_t bsp_esp01s_http_post(const char *host, uint16_t port, const char *json)
 
     if (!esp_wait_for("OK", 5000))
     {
-        printf("[HTTP] TCP connect fail\r\n");
+        printf("[HTTP] TCP connect FAIL to %s:%d\r\n", host, port);
+        printf("[HTTP] Check if device is online\r\n");
         return 0;
     }
 
@@ -486,7 +487,7 @@ uint8_t bsp_esp01s_http_post(const char *host, uint16_t port, const char *json)
     }
     else
     {
-        printf("[HTTP] Send fail\r\n");
+        printf("[HTTP] Send FAIL\r\n");
     }
 
     /* close connection */
