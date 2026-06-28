@@ -442,6 +442,11 @@
               <FileType>1</FileType>
               <FilePath>..\BSP\Src\bsp_esp01s.c</FilePath>
             </File>
+            <File>
+              <FileName>bsp_uart3.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\Src\bsp_uart3.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
