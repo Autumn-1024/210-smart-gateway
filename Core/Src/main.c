@@ -23,6 +23,7 @@
 #include "bsp_rs485.h"
 #include "bsp_curtain.h"
 #include "bsp_esp01s.h"
+#include "bsp_adc.h"
 #include "app_task.h"
 #include "app_web.h"
 
@@ -75,6 +76,7 @@ int main(void)
     oled_init();
     bsp_rs485_init(9600);
     bsp_curtain_init();
+    bsp_adc_init();
 
     app_web_init();
 

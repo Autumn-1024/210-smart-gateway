@@ -14,6 +14,7 @@ extern "C" {
 #define HAL_CORTEX_MODULE_ENABLED
 #define HAL_DMA_MODULE_ENABLED
 #define HAL_UART_MODULE_ENABLED
+#define HAL_ADC_MODULE_ENABLED
 
 /* 振荡器参数 */
 #if !defined (HSE_VALUE)
@@ -71,6 +72,9 @@ extern "C" {
 #endif
 #ifdef HAL_UART_MODULE_ENABLED
   #include "stm32f1xx_hal_uart.h"
+#endif
+#ifdef HAL_ADC_MODULE_ENABLED
+  #include "stm32f1xx_hal_adc.h"
 #endif
 
 #ifdef __cplusplus

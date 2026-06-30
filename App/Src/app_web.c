@@ -18,6 +18,7 @@
 #include "bsp_esp01s.h"
 #include "bsp_rs485.h"
 #include "bsp_oled.h"
+#include "bsp_adc.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -91,6 +92,13 @@ static const char html_page[] =
 "#log .t{color:rgba(255,255,255,.25)}"
 "@media(min-width:768px){.gc{grid-template-columns:repeat(4,1fr)}.ga{grid-template-columns:repeat(2,1fr)}.gl{grid-template-columns:repeat(6,1fr)}}"
 "@media(max-width:500px){.gc,.ga,.gl{grid-template-columns:repeat(2,1fr)}}"
+".sn{max-width:1000px;margin:0 auto 16px;background:rgba(255,255,255,.05);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:14px;display:flex;align-items:center;gap:16px}"
+".sn .v{font-size:32px;font-weight:700;color:#fbbf24;min-width:70px;text-align:center}"
+".sn .i{flex:1}"
+".sn .i h3{font-size:12px;color:rgba(255,255,255,.4);margin-bottom:6px}"
+".sn .br{height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}"
+".sn .br .f{height:100%;background:#fbbf24;border-radius:3px;transition:width .5s}"
+".sn .t{font-size:10px;color:rgba(255,255,255,.25);margin-top:4px}"
 "</style></head><body>"
 "<h1>智能网关</h1>"
 "<p class=\"sub\">窗帘 &middot; 空调 &middot; 灯光</p>"
@@ -141,12 +149,29 @@ static const char html_page[] =
 "<div class=\"g\" style=\"max-width:1000px;margin:10px auto 0;grid-template-columns:1fr 1fr\">"
 "<button class=\"b o\" onclick=\"s(this,'/l/0/1')\">全部开</button>"
 "<button class=\"b x\" onclick=\"s(this,'/l/0/0')\">全部关</button></div></div>"
+"<div class=\"section\"><h2>环境感知</h2>"
+"<div class=\"sn\">"
+"<div class=\"v\" id=\"sv\">--</div>"
+"<div class=\"i\">"
+"<h3>光照强度</h3>"
+"<div class=\"br\"><div class=\"f\" id=\"sb\"></div></div>"
+"<div class=\"t\"><span id=\"sp\">0</span>% · ADC <span id=\"sa\">0</span></div>"
+"</div></div></div>"
 "<div id=\"log\"></div>"
 "<script>"
 "var lg=document.getElementById('log');"
 "function a(m,c){var d=document.createElement('div');d.className=c||'';var t=new Date();d.innerHTML='<span class=t>'+('0'+t.getHours()).slice(-2)+':'+('0'+t.getMinutes()).slice(-2)+':'+('0'+t.getSeconds()).slice(-2)+'</span> '+m;lg.appendChild(d);lg.scrollTop=lg.scrollHeight;if(lg.children.length>50)lg.removeChild(lg.firstChild)}"
 "function s(b,p){b.classList.add('d');a('>> '+p);fetch(p).then(function(r){return r.text()}).then(function(t){a('<< '+t);b.classList.remove('d')}).catch(function(e){a('ERR '+e,'e');b.classList.remove('d')})}"
 "a('网关就绪','t')"
+"function poll(){fetch('/adc').then(function(r){return r.text()}).then(function(t){"
+"var v=parseInt(t);if(isNaN(v))return;"
+"var p=Math.round(v/4095*100);"
+"document.getElementById('sv').innerText=p+'%';"
+"document.getElementById('sp').innerText=p;"
+"document.getElementById('sa').innerText=v;"
+"document.getElementById('sb').style.width=p+'%'"
+"}).catch(function(){})}"
+"setInterval(poll,2000);poll();"
 "</script></body></html>";
 
 static const char http_200_header[] =
@@ -288,6 +313,16 @@ static void on_http_request(uint8_t link_id, const char *method, const char *pat
         }
 
         bsp_esp01s_send_response(link_id, http_200_text, msg);
+        return;
+    }
+
+    /* ADC 光照传感器: /adc */
+    if (path[0] == '/' && path[1] == 'a' && path[2] == 'd' && path[3] == 'c')
+    {
+        char adc_str[8];
+        uint16_t val = bsp_adc_read_avg(16);
+        snprintf(adc_str, sizeof(adc_str), "%u", val);
+        bsp_esp01s_send_response(link_id, http_200_text, adc_str);
         return;
     }
 
