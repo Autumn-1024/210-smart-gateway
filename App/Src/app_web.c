@@ -171,7 +171,7 @@ static const char html_page[] =
 "document.getElementById('sa').innerText=v;"
 "document.getElementById('sb').style.width=p+'%'"
 "}).catch(function(){})}"
-"setInterval(poll,2000);poll();"
+"setInterval(poll,5000);setTimeout(poll,3000);"
 "</script></body></html>";
 
 static const char http_200_header[] =
