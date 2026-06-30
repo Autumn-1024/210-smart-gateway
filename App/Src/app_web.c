@@ -34,7 +34,7 @@
 #define IR2_MODULE_IP   "10.0.50.107"
 #define IR2_MODULE_PORT 80
 
-#define LIGHT1_IP       "10.0.50.105"
+#define LIGHT1_IP       "10.0.50.104"
 #define LIGHT2_IP       "10.0.50.106"
 #define LIGHT_PORT      80
 
